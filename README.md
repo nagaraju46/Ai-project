@@ -31,33 +31,41 @@ A modern, responsive chat application that integrates with OpenAI's GPT API to p
 ### Installation
 
 1. Clone the repository:
-```bash
+
 git clone <your-repo-url>
 cd ai-chat-app
 ```
 
-2. Install dependencies:
-```bash
+##### Environment Setup
+To run the app locally:
+
+1. Copy the .env.api file:
+
+cp .env.example .env
+
+2. Paste actual API key in `.env`:
+
+VITE_GEMINI_API_KEY=AIzaSyDmlV7rAapR4t7aw2fhk87jZd8J-evUDqM
+
+3. Start the App by following below:
+
+npm install
+npm run dev
+
+#### To START:
+
+1. Install dependencies:
+
 npm install
 ```
 
-3. Start the development server:
-```bash
+2. Start the development server:
+
 npm run dev
 ```
 
 4. Open your browser and navigate to `http://localhost:5173`
 
-### Getting an OpenAI API Key
-
-1. Visit [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Sign in to your OpenAI account (or create one)
-3. Navigate to the API Keys section
-4. Click "Create new secret key"
-5. Copy the generated key
-6. Enter the key in the application when prompted
-
-**Important**: Keep your API key secure and never share it publicly. The application stores it locally in your browser.
 
 ## Usage
 

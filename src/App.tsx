@@ -11,13 +11,13 @@ import { useLocalStorage } from './hooks/useLocalStorage';
 function App() {
   const [apiKey, setApiKey] = useLocalStorage<string>('gemini-api-key', 'AIzaSyDmlV7rAapR4t7aw2fhk87jZd8J-evUDqM');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  
-  const { 
-    messages, 
-    isLoading, 
-    error, 
-    sendMessage, 
-    clearHistory, 
+
+  const {
+    messages,
+    isLoading,
+    error,
+    sendMessage,
+    clearHistory,
     clearError,
     savedConversations,
     currentConversationId,
@@ -42,11 +42,17 @@ function App() {
     setShowSettingsModal(true);
   };
 
+  const handleNewConversation = () => {
+    // Save current conversation if it has messages
+    if (messages.length > 0) {
+      saveCurrentConversation();
+    }
+    startNewConversation();
+  };
+
   // Show API key input if no key is set or settings is open
   if (!apiKey) {
-    return (
-      <ApiKeyInput onApiKeySet={handleApiKeySet} />
-    );
+    return <ApiKeyInput onApiKeySet={handleApiKeySet} />;
   }
 
   return (
@@ -60,24 +66,22 @@ function App() {
         onLoadConversation={loadSavedConversation}
         onDeleteConversation={deleteSavedConversation}
       />
-      
+
       <ChatHeader 
         onClearHistory={handleClearHistory}
         onShowSettings={handleShowSettings}
+        onNewConversation={startNewConversation}
+        savedConversations={savedConversations}
+        onLoadConversation={loadSavedConversation}
+        currentConversationId={currentConversationId}
         messageCount={messages.length}
       />
-      
-      {error && (
-        <ErrorMessage error={error} onDismiss={clearError} />
-      )}
+
+      {error && <ErrorMessage error={error} onDismiss={clearError} />}
       
       <ChatHistory messages={messages} />
-      
-      <ChatInput 
-        onSendMessage={sendMessage}
-        isLoading={isLoading}
-        disabled={!apiKey}
-      />
+
+      <ChatInput onSendMessage={sendMessage} isLoading={isLoading} disabled={!apiKey} />
     </div>
   );
 }
