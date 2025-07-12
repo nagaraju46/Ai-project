@@ -19,3 +19,11 @@ export interface OpenAIResponse {
     };
   }>;
 }
+
+export interface SavedConversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
+}

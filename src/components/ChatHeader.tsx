@@ -10,7 +10,7 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({ 
   onClearHistory, 
   onShowSettings, 
-  messageCount
+  messageCount,
 }) => {
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -22,7 +22,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <div>
             <h1 className="text-xl font-semibold text-gray-800">AI Chat</h1>
             <p className="text-sm text-gray-600">
-              Powered by Google Gemini • {messageCount > 0 ? `${messageCount} messages` : 'Ready to chat'}
+              {messageCount > 0 ? `${messageCount} messages • Auto-saving enabled` : 'Ready to chat'}
             </p>
           </div>
         </div>

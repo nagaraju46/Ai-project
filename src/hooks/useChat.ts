@@ -1,6 +1,8 @@
+import React from 'react';
 import { useState, useCallback } from 'react';
 import { Message, ChatState } from '../types';
 import { createGeminiService } from '../services/gemini';
+import { useConversations } from './useConversations';
 
 export const useChat = (apiKey: string) => {
   const [state, setState] = useState<ChatState>({
@@ -9,8 +11,33 @@ export const useChat = (apiKey: string) => {
     error: null,
   });
 
+  const {
+    savedConversations,
+    currentConversationId,
+    saveConversation,
+    updateConversation,
+    deleteConversation,
+    loadConversation,
+    setCurrentConversationId,
+  } = useConversations();
+
   const geminiService = createGeminiService(apiKey);
 
+  // Auto-save conversation after each AI response
+  const autoSaveConversation = useCallback((messages: Message[]) => {
+    if (messages.length >= 2) { // At least one user message and one AI response
+      if (currentConversationId) {
+        // Update existing conversation
+        updateConversation(currentConversationId, messages);
+      } else {
+        // Save new conversation
+        const newId = saveConversation(messages);
+        if (newId) {
+          setCurrentConversationId(newId);
+        }
+      }
+    }
+  }, [currentConversationId, saveConversation, updateConversation, setCurrentConversationId]);
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
 
@@ -65,6 +92,17 @@ export const useChat = (apiKey: string) => {
         ),
         isLoading: false,
       }));
+
+      // Auto-save the conversation after successful AI response
+      setState(prev => {
+        const updatedMessages = prev.messages.map(msg => 
+          msg.id === aiMessageId 
+            ? { ...msg, content: response, isLoading: false }
+            : msg
+        );
+        autoSaveConversation(updatedMessages);
+        return prev;
+      });
     } catch (error) {
       let errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       
@@ -93,7 +131,7 @@ export const useChat = (apiKey: string) => {
         error: errorMessage,
       }));
     }
-  }, [apiKey, state.messages, geminiService]);
+  }, [apiKey, state.messages, geminiService, autoSaveConversation]);
 
   const clearHistory = useCallback(() => {
     setState({
@@ -101,16 +139,64 @@ export const useChat = (apiKey: string) => {
       isLoading: false,
       error: null,
     });
+    setCurrentConversationId(null);
   }, []);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
+  const saveCurrentConversation = useCallback(() => {
+    if (state.messages.length > 0) {
+      if (currentConversationId) {
+        updateConversation(currentConversationId, state.messages);
+        return currentConversationId;
+      } else {
+        const conversationId = saveConversation(state.messages);
+        if (conversationId) {
+          setCurrentConversationId(conversationId);
+        }
+        return conversationId;
+      }
+    }
+    return null;
+  }, [state.messages, saveConversation, updateConversation, currentConversationId, setCurrentConversationId]);
+
+  const loadSavedConversation = useCallback((id: string) => {
+    const messages = loadConversation(id);
+    if (messages) {
+      setState({
+        messages,
+        isLoading: false,
+        error: null,
+      });
+    }
+  }, [loadConversation]);
+
+  const deleteSavedConversation = useCallback((id: string) => {
+    deleteConversation(id);
+    if (currentConversationId === id) {
+      clearHistory();
+    }
+  }, [deleteConversation, currentConversationId, clearHistory]);
+
+  const startNewConversation = useCallback(() => {
+    clearHistory();
+  }, [clearHistory]);
+
+
   return {
     ...state,
     sendMessage,
     clearHistory,
     clearError,
+    // Conversation management
+    savedConversations,
+    currentConversationId,
+    saveCurrentConversation,
+    loadSavedConversation,
+    deleteSavedConversation,
+    startNewConversation,
+    hasUnsavedMessages: false, // Auto-save is enabled, so no unsaved messages
   };
 };

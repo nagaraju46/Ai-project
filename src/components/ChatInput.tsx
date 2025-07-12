@@ -56,12 +56,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <button
           type="submit"
           disabled={!message.trim() || isLoading || disabled}
-          className="flex-shrink-0 w-12 h-12 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+          className="flex-shrink-0 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center font-medium"
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              Processing...
+            </>
           ) : (
-            <Send className="w-5 h-5" />
+            "Ask AI"
           )}
         </button>
       </div>
